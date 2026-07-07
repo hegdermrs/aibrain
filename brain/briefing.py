@@ -18,6 +18,7 @@ from brain.models import (
     BriefingSection,
     BriefingType,
     BusinessMetric,
+    CalendarSnapshot,
     DailyBriefing,
     HermesDigest,
     HermesSignal,
@@ -67,12 +68,28 @@ def _format_metrics(metrics: list[BusinessMetric]) -> str:
     return "\n".join(lines)
 
 
+def _format_calendar(calendar: CalendarSnapshot | None) -> str:
+    """Format upcoming calendar events into a readable block."""
+    if not calendar or not calendar.events:
+        return "No upcoming meetings on the calendar."
+    lines = []
+    for e in sorted(calendar.events, key=lambda x: x.start):
+        when = e.start.strftime("%a %b %d, %I:%M %p")
+        who = f" with {', '.join(e.attendees)}" if e.attendees else ""
+        kind = f" [{e.meeting_type}]" if e.meeting_type else ""
+        lines.append(f"- {when}{kind}: {e.title}{who}")
+        if e.notes:
+            lines.append(f"  Notes: {e.notes}")
+    return "\n".join(lines)
+
+
 def generate_briefing(
     digest: HermesDigest,
     metrics: MetricsSnapshot | None = None,
     briefing_type: BriefingType = BriefingType.MORNING,
     morning_context: str = "",
     date: datetime | None = None,
+    calendar: CalendarSnapshot | None = None,
 ) -> DailyBriefing:
     """
     Generate a daily briefing from Hermes signals and metrics.
@@ -95,6 +112,8 @@ def generate_briefing(
     metrics_list = metrics.metrics if metrics else []
     time_window = f"{digest.time_window_start} to {digest.time_window_end}"
 
+    calendar_block = _format_calendar(calendar)
+
     if briefing_type == BriefingType.MORNING:
         prompt_template = prompts.get("morning_briefing", "")
         prompt = prompt_template.format(
@@ -102,6 +121,7 @@ def generate_briefing(
             time_window=time_window,
             signals=_format_signals(digest.signals),
             metrics=_format_metrics(metrics_list),
+            calendar=calendar_block,
         )
     else:
         prompt_template = prompts.get("evening_briefing", "")
@@ -110,6 +130,7 @@ def generate_briefing(
             morning_context=morning_context or "No morning briefing was generated.",
             signals=_format_signals(digest.signals),
             metrics=_format_metrics(metrics_list),
+            calendar=calendar_block,
         )
 
     from brain.learning import lessons_block

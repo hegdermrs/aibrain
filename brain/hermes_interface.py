@@ -19,6 +19,7 @@ from typing import Optional
 
 from brain.models import (
     BusinessMetric,
+    CalendarSnapshot,
     CallTranscript,
     HermesDigest,
     HermesSignal,
@@ -82,6 +83,17 @@ class HermesInterface:
             data = json.loads(files[0].read_text(encoding="utf-8"))
             return MetricsSnapshot(**data)
         return MetricsSnapshot(metrics=[])
+
+    def read_calendar(self) -> CalendarSnapshot:
+        """Read the latest calendar snapshot from Hermes."""
+        files = sorted(self.digest_dir.glob("calendar_*.json"), reverse=True)
+        if files:
+            try:
+                data = json.loads(files[0].read_text(encoding="utf-8"))
+                return CalendarSnapshot(**data)
+            except Exception:
+                pass
+        return CalendarSnapshot(events=[])
 
     # ── Transcripts ─────────────────────────────────────────────────────────
 

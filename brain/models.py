@@ -83,6 +83,26 @@ class MetricsSnapshot(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
+# ── Calendar ─────────────────────────────────────────────────────────────────
+
+
+class CalendarEvent(BaseModel):
+    """A scheduled meeting Hermes reads from Jim's calendar."""
+    title: str
+    start: datetime
+    end: Optional[datetime] = None
+    attendees: list[str] = Field(default_factory=list)
+    location: str = ""
+    notes: str = ""
+    meeting_type: str = ""  # coaching | podcast | discovery | speaking | personal | other
+
+
+class CalendarSnapshot(BaseModel):
+    """Upcoming calendar events surfaced by Hermes."""
+    events: list[CalendarEvent] = Field(default_factory=list)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── Call Transcript ──────────────────────────────────────────────────────────
 
 

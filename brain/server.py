@@ -45,6 +45,7 @@ from brain.formatting import format_analysis, format_briefing
 from brain.hermes_interface import HermesInterface
 from brain.models import (
     BriefingType,
+    CalendarSnapshot,
     CallTranscript,
     HermesDigest,
     MetricsSnapshot,
@@ -183,6 +184,14 @@ def webhook_metrics(metrics: MetricsSnapshot) -> dict:
     return {"status": "stored", "metrics": len(metrics.metrics)}
 
 
+@app.post("/webhook/calendar")
+def webhook_calendar(calendar: CalendarSnapshot) -> dict:
+    """Receive upcoming calendar events. Used by briefings for 'what's next'."""
+    _save_json(DIGEST_DIR / f"calendar_{_ts()}.json",
+               calendar.model_dump(mode="json"))
+    return {"status": "stored", "events": len(calendar.events)}
+
+
 # ── On-demand briefing (also used by the scheduler) ───────────────────────────
 
 
@@ -196,8 +205,10 @@ def _run_briefing(briefing_type: BriefingType) -> Optional[OutgoingMessage]:
     if digest is None:
         return None
     metrics = hermes.read_metrics()
+    calendar = hermes.read_calendar()
     briefing = generate_briefing(
-        digest=digest, metrics=metrics, briefing_type=briefing_type
+        digest=digest, metrics=metrics, briefing_type=briefing_type,
+        calendar=calendar,
     )
     _save_json(
         BRIEFINGS_DIR / f"{briefing_type.value}_{_ts()}.json",

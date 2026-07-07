@@ -30,20 +30,19 @@ All bodies are JSON. Send `Content-Type: application/json`.
 (Recommend adding a shared secret header `X-Brain-Key: <token>` on every
 call — see §10. The Brain must be configured to require it.)
 
-**You push data IN:**
+Your role is the **24/7 heavy lifting on Jim's Mac**: read everything coming
+in — emails, call transcripts, calendar meetings, Skool — and push it to the
+Brain. The Brain does the AI reasoning (what needs Jim, what to delegate,
+what's next) and **delivers to Jim's Telegram itself**. You do NOT deliver.
+
+**You push data IN (this is your main job):**
 
 | Call | When | Body |
 |------|------|------|
 | `POST /webhook/transcript` | after every call | `CallTranscript` (§5.3) |
-| `POST /webhook/digest` | on a cadence + on urgent signals | `HermesDigest` (§5.1) |
+| `POST /webhook/digest` | continuously / on a cadence | `HermesDigest` (§5.1) — all emails + Skool as signals |
+| `POST /webhook/calendar` | when the schedule changes | `CalendarSnapshot` (§5.4) |
 | `POST /webhook/metrics` | daily | `MetricsSnapshot` (§5.2) |
-
-**You pull results OUT and deliver them:**
-
-| Call | Purpose |
-|------|---------|
-| `GET /outgoing/pending` | list results Brain wants delivered |
-| `POST /outgoing/{id}/ack` | mark one delivered (after you send it) |
 
 **You feed the learning loop:**
 
@@ -51,13 +50,18 @@ call — see §10. The Brain must be configured to require it.)
 |------|---------|
 | `POST /feedback` | record Jim's reaction to a delivered result (§8) |
 
-**Health/observability:** `GET /health`, `GET /status` (shows digest age,
-pending count, lessons learned, unprocessed feedback).
+**Health/observability:** `GET /health`, `GET /status`.
 
-The Brain generates the morning/evening briefings itself on a schedule
-(≈12:00 and 23:00 UTC) by reading the **latest digest you pushed**. So your
-job for briefings is not to trigger them — it is to keep digests fresh and
-then deliver what shows up in `/outgoing/pending`.
+**Delivery is automatic.** The Brain texts Jim directly on Telegram, so you do
+NOT pull `/outgoing`. (It still exists as a fallback: if the Brain's Telegram
+is ever unconfigured, results wait in `GET /outgoing/pending` for you to send
+and `POST /outgoing/{id}/ack`. Under normal operation, ignore it.)
+
+The Brain generates morning/evening briefings itself on a schedule by reading
+the latest digest + calendar you pushed. Your job for briefings is just to
+**keep the inputs fresh** — push emails/Skool as signals, and keep the
+calendar current. The Brain also polls Jim's inbox for Fathom call emails on
+its own, so call summaries work even before you wire transcripts.
 
 ---
 
@@ -213,10 +217,37 @@ profile-enriched context in `summary` and full content in `raw_text`.
 }
 ```
 `segments` may be `[]` if you don't have speaker timing — **`full_text` is
-what the Brain analyzes**, so always fill it. The Brain will auto-analyze and
-queue the result in `/outgoing`. Its response tells you `follow_ups` count.
+what the Brain analyzes**, so always fill it. The Brain auto-analyzes and
+texts Jim the summary directly. Its response tells you the `follow_ups` count.
 
-### 5.4 Feedback — `POST /feedback` (see §8)
+### 5.4 Calendar — `POST /webhook/calendar`
+```json
+{
+  "events": [
+    {
+      "title": "Coaching — Mark T.",
+      "start": "2026-07-08T15:00:00Z",
+      "end": "2026-07-08T15:50:00Z",
+      "attendees": ["Mark T."],
+      "location": "Zoom",
+      "notes": "Session 4 — energy-audit follow-up",
+      "meeting_type": "coaching"
+    },
+    {
+      "title": "Podcast interview — guest TBD",
+      "start": "2026-07-08T18:00:00Z",
+      "meeting_type": "podcast"
+    }
+  ],
+  "timestamp": "2026-07-07T23:00:00Z"
+}
+```
+Push Jim's upcoming meetings (next ~7 days). `meeting_type` ∈
+`coaching | podcast | discovery | speaking | personal | other`. The Brain uses
+this for the "what's next / prep" part of briefings. Re-push when the schedule
+changes.
+
+### 5.5 Feedback — `POST /feedback` (see §8)
 ```json
 {
   "target_kind": "analysis",
@@ -227,7 +258,9 @@ queue the result in `/outgoing`. Its response tells you `follow_ups` count.
 }
 ```
 
-### 5.5 Outgoing message you receive from `GET /outgoing/pending`
+### 5.6 Outgoing message (fallback only — `GET /outgoing/pending`)
+Normally you ignore this; the Brain delivers to Telegram itself. Shape if you
+ever need the fallback path:
 ```json
 {
   "id": "2222d3176c23",
