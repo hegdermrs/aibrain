@@ -6,8 +6,14 @@ that already exists and runs 24/7 in the cloud. You do everything that
 touches the outside world; the Brain only thinks.
 
 - **You (Hermes):** run on Jim's desktop. Own his browser sessions (Gmail,
-  Google Calendar, Google Drive, Skool), Fathom output, and Telegram. You
-  watch, capture, deliver, and learn what matters to Jim.
+  Google Calendar, Google Drive, **his Skool community**, his coaching/
+  scheduling platform), Fathom call output, and Telegram. You watch, capture,
+  deliver, and learn what matters to Jim. (Jim's business = 1:1 coaching + a
+  guest-interview podcast + speaking + an active **Skool community**.)
+
+  **Skool is a core source.** You log into Skool in the browser, read the
+  community — posts, comments, new members, engagement, questions — analyze
+  what matters, and report it to the Brain as signals (`source: "skool"`).
 - **Brain:** receives what you send, produces briefings / call analyses /
   strategic advice, and hands results back for you to deliver. It never
   connects to anything itself.
@@ -66,10 +72,19 @@ Discovery sources and what to extract:
   partners, VIPs. Note names, emails, roles, typical topics.
 - **Google Drive:** index folders/docs — SOPs, client rosters, financial
   sheets, offer/pricing docs, program curricula, brand/voice guides.
-- **Google Calendar:** recurring meetings and cadence — the weekly assistant
-  call, client sessions, standing commitments.
-- **Skool:** community structure, membership tiers, baseline engagement,
-  moderators, key members.
+- **Google Calendar:** recurring meetings and cadence — coaching sessions,
+  podcast interviews, discovery/sales calls, standing commitments.
+- **Skool community (core):** log in and read it — members and tiers,
+  engagement baseline, most active/at-risk members, moderators, recurring
+  questions and themes. This is a primary source of member health, leads, and
+  content ideas — treat it on par with email.
+- **Coaching / scheduling platform:** the active client roster, session
+  history, upcoming bookings.
+- **Podcast pipeline:** upcoming and past guest interviews (many of his calls
+  are podcast recordings, not coaching).
+
+(For Jim, the operator seeds this profile from a 5-question onboarding; you
+keep it current from there. See CONCIERGE_RUNBOOK.md.)
 
 Produce and maintain a private **Business Profile** (your own store, e.g.
 `hermes/state/business_profile.json`) with at least:
@@ -101,13 +116,17 @@ and contextualize. The better your profile, the better every briefing.
 
 Turn real-world events into **signals**. Tag each with a priority.
 
-- **Email:** client inquiries, urgent/time-sensitive messages, anything with
-  a decision or question for Jim, invoices/payments, partner/vendor updates.
-- **Skool:** new members, milestones, high-engagement posts, questions
-  needing Jim, moderation issues.
-- **Telegram:** messages from Jim's assistant (Sarah), status updates,
-  questions that need a response.
-- **Calendar:** upcoming commitments, new invites, conflicts, prep needed.
+- **Email:** coaching-client messages, new-client/discovery inquiries,
+  podcast guest logistics, speaking/partnership requests, invoices/payments,
+  anything with a decision or question for Jim.
+- **Skool:** log in and read the community — new members, milestones,
+  high-engagement or **unanswered** posts, questions that need Jim,
+  at-risk/quiet members, moderation issues, emerging themes. Surface these as
+  signals (`source: "skool"`).
+- **Telegram:** messages from Jim's assistant, status updates, questions that
+  need a response.
+- **Calendar:** upcoming coaching sessions, podcast interviews, discovery
+  calls; new invites, conflicts, prep needed.
 - **Fathom:** every completed call → a transcript (goes to §5.3, not a signal).
 - **Drive:** meaningful new/edited docs (a new proposal, updated pricing).
 
@@ -171,9 +190,10 @@ profile-enriched context in `summary` and full content in `raw_text`.
 ```json
 {
   "metrics": [
-    { "name": "Active Clients", "value": 42, "previous_value": 40, "unit": "", "trend": "up", "note": "2 onboards this week" },
-    { "name": "MRR", "value": 21000, "previous_value": 20000, "unit": "$", "trend": "up" },
-    { "name": "Skool Engagement", "value": 87.5, "previous_value": 85, "unit": "%", "trend": "up" }
+    { "name": "Active Coaching Clients", "value": 42, "previous_value": 40, "unit": "", "trend": "up", "note": "2 onboards this week" },
+    { "name": "Skool Members", "value": 512, "previous_value": 498, "unit": "", "trend": "up" },
+    { "name": "Skool Engagement", "value": 87.5, "previous_value": 85, "unit": "%", "trend": "up" },
+    { "name": "Open Discovery Leads", "value": 6, "previous_value": 4, "unit": "", "trend": "up" }
   ],
   "timestamp": "2026-07-07T22:45:00Z"
 }
@@ -326,7 +346,8 @@ The Brain writes its outputs to `data/outgoing/out_*.json` (same shape as
 ## 10. Reliability & security rules
 
 - **Idempotency / dedupe:** track a last-seen cursor per source and a set of
-  processed ids (email message-id, Skool post id, Fathom call id). Never send
+  processed ids (email message-id, Skool post id, calendar event id, Fathom
+  call id). Never send
   the same event twice.
 - **Retries:** on `5xx` or network error, retry with exponential backoff
   (e.g. 1s, 4s, 15s, then queue for the next cycle). Webhook posts are safe to
@@ -348,19 +369,23 @@ The Brain writes its outputs to `data/outgoing/out_*.json` (same shape as
    that the key works.
 2. **Deliver loop:** implement §7. Test by having someone enqueue a test
    message on the Brain; confirm it reaches Jim's Telegram and acks.
-3. **Email → digest:** watch Gmail, build signals, `POST /webhook/digest` on
-   the §6 cadence. Verify a briefing appears in `/outgoing` at the next
-   scheduled time and you deliver it.
-4. **Fathom → transcript:** on call completion, `POST /webhook/transcript`;
-   deliver the analysis that comes back.
-5. **Metrics:** compute daily and `POST /webhook/metrics`.
-6. **Feedback:** capture Telegram reactions → `POST /feedback`. Confirm
+3. **Fathom → transcript (SHIP THIS FIRST — highest value, least setup):** on
+   call completion, `POST /webhook/transcript`; deliver the analysis that comes
+   back. This is Jim's day-one win — he finishes a call and gets what needs his
+   attention minutes later, with zero behavior change from him.
+4. **Feedback:** capture Telegram reactions → `POST /feedback`. Confirm
    lessons appear in `GET /learn/lessons` after a few.
-7. **Business discovery (§2):** run the profile build; wire enrichment into
-   steps 3–5.
-8. **Calendar, Drive, Skool:** add as signal/context sources.
+5. **Email + Skool → digest:** watch Gmail and log into Skool to read the
+   community; build signals from both and `POST /webhook/digest` on the §6
+   cadence. Verify a briefing appears in `/outgoing` at the next scheduled time
+   and you deliver it. (Skool is a core briefing source — give it equal weight.)
+6. **Metrics:** compute daily (incl. Skool members/engagement) and
+   `POST /webhook/metrics`.
+7. **Business discovery (§2):** seed/maintain the profile; wire enrichment into
+   steps 3–6.
+8. **Calendar, Drive, coaching platform:** add as signal/context sources.
 9. **Harden (§10):** dedupe, retries, secret, monitoring.
 
-Ship 1–2 first; that proves the pipe end-to-end (Jim receives something).
+Ship 1–3 first; that proves the pipe end-to-end (Jim gets a call summary).
 Everything after that is adding sources into a loop that already works.
 ```

@@ -51,6 +51,9 @@ from brain.models import (
 )
 from brain.outbox import Outbox, OutgoingMessage
 from brain.learning import FeedbackRecord, get_store
+from brain import telegram
+from brain import poller
+from brain.delivery import queue_and_deliver as _queue_and_deliver
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -81,6 +84,10 @@ def _save_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
 
+# delivery lives in brain/delivery.py (shared with the background poller);
+# imported above as _queue_and_deliver.
+
+
 # ── Health / status ───────────────────────────────────────────────────────────
 
 
@@ -102,7 +109,31 @@ def status() -> dict:
         "lessons_learned": len(learning.get_lessons()),
         "feedback_total": len(feedback),
         "feedback_unprocessed": sum(1 for f in feedback if not f.processed),
+        "telegram_configured": telegram.is_configured(),
+        "email_poll_configured": poller.is_configured(),
     }
+
+
+@app.post("/poll/email")
+def poll_email_now() -> dict:
+    """Run one email poll immediately (also runs on an interval)."""
+    return poller.poll_email()
+
+
+@app.post("/telegram/test")
+def telegram_test() -> dict:
+    """Send a test message to Jim's Telegram to confirm delivery works."""
+    if not telegram.is_configured():
+        raise HTTPException(
+            status_code=409,
+            detail="Telegram not configured (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)",
+        )
+    ok = telegram.send_message(
+        "✅ *Brain connected.* You'll get briefings and call summaries here."
+    )
+    if not ok:
+        raise HTTPException(status_code=502, detail="Telegram send failed")
+    return {"status": "sent"}
 
 
 # ── Inbound webhooks (Hermes → Brain) ─────────────────────────────────────────
@@ -123,7 +154,7 @@ def webhook_transcript(transcript: CallTranscript) -> dict:
     _save_json(ANALYSIS_DIR / f"call_{_ts()}.json",
                analysis.model_dump(mode="json"))
 
-    msg = outbox.enqueue(OutgoingMessage(
+    msg = _queue_and_deliver(OutgoingMessage(
         kind="analysis",
         title=f"Call analysis: {analysis.call_title}",
         text=format_analysis(analysis),
@@ -132,6 +163,7 @@ def webhook_transcript(transcript: CallTranscript) -> dict:
               "decisions": len(analysis.decisions)},
     ))
     return {"status": "analyzed", "outgoing_id": msg.id,
+            "delivered": msg.delivered,
             "follow_ups": len(analysis.follow_ups)}
 
 
@@ -171,7 +203,7 @@ def _run_briefing(briefing_type: BriefingType) -> Optional[OutgoingMessage]:
         BRIEFINGS_DIR / f"{briefing_type.value}_{_ts()}.json",
         briefing.model_dump(mode="json"),
     )
-    return outbox.enqueue(OutgoingMessage(
+    return _queue_and_deliver(OutgoingMessage(
         kind="briefing",
         title=f"{briefing_type.value.title()} briefing",
         text=format_briefing(briefing),
@@ -290,6 +322,16 @@ def _start_scheduler() -> None:
         CronTrigger(hour=reflect_hour, minute=30),
         id="nightly_reflection", replace_existing=True,
     )
+
+    # Interval: pull new Fathom call emails, analyze, deliver to Jim.
+    if poller.is_configured():
+        from apscheduler.triggers.interval import IntervalTrigger
+        scheduler.add_job(
+            poller.poll_email,
+            IntervalTrigger(minutes=poller.poll_minutes()),
+            id="email_poll", replace_existing=True,
+        )
+
     scheduler.start()
 
 
