@@ -5,11 +5,11 @@ All data structures use Pydantic for validation.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
@@ -95,6 +95,17 @@ class CalendarEvent(BaseModel):
     location: str = ""
     notes: str = ""
     meeting_type: str = ""  # coaching | podcast | discovery | speaking | personal | other
+
+    @field_validator("start", "end")
+    @classmethod
+    def _assume_utc_if_naive(cls, v: Optional[datetime]) -> Optional[datetime]:
+        # All-day events from Google Calendar arrive as a bare date
+        # ("2026-07-08"), which parses to a naive datetime, while timed
+        # events include a timezone. Sorting a mix of naive/aware datetimes
+        # raises TypeError — normalize everything to UTC-aware on the way in.
+        if v is not None and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
 
 class CalendarSnapshot(BaseModel):
