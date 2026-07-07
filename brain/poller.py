@@ -1,10 +1,17 @@
 """
-Background poller — the Brain's own 24/7 "pull data on an interval" loop.
+Background poller — an OPTIONAL email-ingestion FALLBACK.
 
-Runs inside the always-on Brain (Railway), so email ingestion needs nothing
-on Jim's Mac and no Zapier. On each tick it checks his inbox over IMAP for
-new Fathom call emails, turns each into a transcript, analyzes it, and
-delivers the summary to Jim's Telegram.
+Division of labor: Hermes (on Jim's Mac) is the workhorse that reads email,
+calendar, Skool, and calls, and pushes them to the Brain. The Brain is the
+decision-maker and does not normally gather data itself.
+
+This poller exists only as a bootstrap/fallback: for the cloud-only path, or
+before Hermes is wired up, the Brain can pull Fathom call emails over IMAP so
+call summaries work day one. It is OFF unless the email env vars are set —
+leave them unset and the Brain gathers nothing; Hermes does all reading.
+
+When enabled, each tick checks the inbox for new Fathom call emails, turns
+each into a transcript, analyzes it, and delivers the summary to Telegram.
 
 Config (env):
   EMAIL_IMAP_HOST      default imap.gmail.com
