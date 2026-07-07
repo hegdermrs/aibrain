@@ -22,8 +22,9 @@ RUN mkdir -p data/incoming data/transcripts data/briefings data/analysis
 # Expose port 8000 (FastAPI automation server)
 EXPOSE 8000
 
-# Health check hits the server's /health endpoint
-HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
+# Health check hits the server's /health endpoint. Railway assigns $PORT
+# dynamically (rarely 8000) — must match the CMD below, not a hardcoded port.
+HEALTHCHECK CMD curl --fail http://localhost:${PORT:-8000}/health || exit 1
 
 # Run the Phase 2 automation server.
 # Railway sets $PORT; default to 8000 locally.

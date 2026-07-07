@@ -80,6 +80,7 @@ env vars, create the Telegram bot, then a 15-minute setup session with Jim.
 ## Docs
 
 - [`HERMES_BUILD_BRIEF.md`](HERMES_BUILD_BRIEF.md) — spec for the Hermes workhorse
+- [`HERMES_SETUP.md`](HERMES_SETUP.md) — **hand this to Jim's Hermes Agent** and it self-installs the `brain-bridge` skill (files, config, cron jobs)
 - [`PHASE_2_API.md`](PHASE_2_API.md) — the Brain's API contract
 - [`CONCIERGE_RUNBOOK.md`](CONCIERGE_RUNBOOK.md) — deploy + onboard Jim
 - [`email_to_jim.md`](email_to_jim.md) — the intro note to Jim

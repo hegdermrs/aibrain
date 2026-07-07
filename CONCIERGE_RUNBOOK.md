@@ -25,16 +25,14 @@ Telegram chat. Everything below is done by **you**, once.
 
 3. **Hermes** — this is Jim's existing
    [Hermes Agent](https://hermes-agent.nousresearch.com/) install on his
-   Mac, already connected to his Telegram/email. Load the `brain-bridge`
-   skill (`~/.hermes/skills/brain-bridge/SKILL.md`): copy
-   `config.example.yaml` to `~/.hermes/brain-bridge/config.yaml`, set
-   `brain_base_url` to the Railway URL from step 1 and `telegram_bot_token`
-   to the same token from step 2, then wire the `hermes cron create`
-   commands in the skill's "Scheduled Runs" section. Read the skill's
-   **Common Pitfalls** section first — Skool scanning is unverified
-   scaffolding (prefer the agent-driven path over the scripted fallback
-   until checked against the live community), and metrics beyond Skool
-   member count need a coaching-platform reader that isn't built yet.
+   Mac, already connected to his Telegram/email. **On the call with Jim,
+   paste him [`HERMES_SETUP.md`](HERMES_SETUP.md) and ask him to give it to
+   his Hermes Agent** ("please set this up for me") — it self-installs the
+   `brain-bridge` skill (writes its own files, asks him for the Brain's URL
+   + the Telegram bot token from step 2, wires the `hermes cron create`
+   jobs, and reports back what it did). You shouldn't need to touch his Mac
+   directly. It'll flag if Skool/Calendar need a browser login only he can
+   click through — that's expected, not a failure.
 
 ---
 
