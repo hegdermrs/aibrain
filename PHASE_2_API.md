@@ -105,7 +105,7 @@ briefing correction only reshapes briefings (plus anything tagged global).
 ```
 
 The webhook bodies are the **exact same JSON** from
-`HERMES_INSTRUCTIONS.md` — just POSTed instead of written to files.
+`HERMES_BUILD_BRIEF.md` — just POSTed instead of written to files.
 
 ---
 

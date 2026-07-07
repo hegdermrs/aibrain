@@ -9,18 +9,23 @@ Telegram chat. Everything below is done by **you**, once.
 
 1. **Deploy the Brain to Railway** (from `github.com/hegdermrs/aibrain`):
    - New Project → Deploy from GitHub → this repo.
-   - Variables: `ANTHROPIC_API_KEY`, `BRAIN_MODEL=claude-sonnet-5`.
+   - Variables (minimum): `ANTHROPIC_API_KEY`, `BRAIN_MODEL=claude-sonnet-5`.
+   - For direct Telegram delivery, also: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+   - Optional email fallback (Fathom-via-email, no Mac needed): `EMAIL_ADDRESS`,
+     `EMAIL_APP_PASSWORD` (Gmail app password), `EMAIL_POLL_MINUTES`.
    - Add a **Volume mounted at `/app/data`** (so the outbox/data survive restarts).
    - Note the URL, e.g. `https://aibrain-production.up.railway.app`.
    - Test: open `<url>/health` → `{"status":"ok"}`.
 
 2. **Create the Telegram bot:**
    - In Telegram, message **@BotFather** → `/newbot` → name it → save the **bot token**.
-   - This is the bot Jim will talk to. Hermes uses the token to message him.
+   - Set it as `TELEGRAM_BOT_TOKEN` on Railway. Jim's `TELEGRAM_CHAT_ID` is
+     captured when he taps Start (step B1) — set it and redeploy.
+   - Verify with `POST <url>/telegram/test` → Jim's phone should buzz.
 
-3. **Hermes** (the AI agent on Jim's desktop): have it ready, and give it the
-   Brain URL + Telegram bot token. It will get Jim's chat id the moment Jim
-   taps Start (step B1).
+3. **Hermes** (the workhorse on Jim's Mac): have it ready with the Brain URL.
+   It reads email/calendar/Skool/calls and pushes them in; the Brain delivers
+   to Telegram itself.
 
 ---
 

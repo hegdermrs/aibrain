@@ -125,7 +125,7 @@ class HermesInterface:
 
     # ── Status ──────────────────────────────────────────────────────────────
 
-    def hermse_digest_age_minutes(self) -> Optional[float]:
+    def hermes_digest_age_minutes(self) -> Optional[float]:
         """How stale is the latest digest? None if no digest exists."""
         digest = self.read_latest_digest()
         if digest is None:

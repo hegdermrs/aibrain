@@ -99,7 +99,7 @@ def health() -> dict:
 
 @app.get("/status")
 def status() -> dict:
-    age = hermes.hermse_digest_age_minutes()
+    age = hermes.hermes_digest_age_minutes()
     pending = outbox.list_pending()
     feedback = learning.list_feedback()
     return {

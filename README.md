@@ -1,175 +1,81 @@
-# 🧠 Operations Co-Founder Brain
+# Operations Co-Founder — Brain
 
-AI-powered operations assistant for your coaching business. Synthesizes signals from Hermes, analyzes calls, and pressure-tests decisions.
+An AI operations brain for Jim Harshaw Jr.'s coaching business. It reads what's
+happening across his email, calls, and calendar, and tells him **what needs his
+attention, what to delegate, and what's next** — delivered to Telegram.
 
----
+## Architecture
 
-## ⚡ Quick Start
+Two agents, one job each:
 
-### Windows
+- **Brain** (this repo) — the decision-maker. Runs 24/7 in the cloud. Takes in
+  emails, call transcripts, calendar, and metrics; reasons over them; produces
+  briefings, call analyses, and strategic advice; and texts Jim on Telegram. It
+  never touches an app directly. Learns from Jim's reactions.
+- **Hermes** (separate, runs on Jim's Mac) — the workhorse. Reads email,
+  calendar, Skool, and calls, and pushes the data to the Brain's webhooks. See
+  [`HERMES_BUILD_BRIEF.md`](HERMES_BUILD_BRIEF.md).
+
 ```
-1. Double-click: INSTALL.bat
-2. Edit .env and add API key
-3. Double-click: START_DASHBOARD.bat
+Hermes (reads email/calendar/Skool/calls) ──▶ Brain (decides) ──▶ Telegram ──▶ Jim
+                                                 ▲ learns from Jim's reactions ┘
 ```
 
-### Mac or Linux
+## What's in here
+
+```
+brain/
+  server.py          FastAPI automation server (webhooks in, Telegram out, scheduler)
+  briefing.py        Morning/evening briefings (attention / delegate / next)
+  analyst.py         Call-transcript analysis (decisions, follow-ups, delegation)
+  lens.py            Strategic lens — pressure-test decisions via personas
+  learning.py        Feedback → distilled "lessons" injected into every prompt
+  poller.py          Optional email-ingestion fallback (IMAP; off unless configured)
+  telegram.py        Direct delivery to Jim's Telegram
+  delivery.py        Shared queue-and-deliver path
+  hermes_interface.py, outbox.py, formatting.py, models.py, client.py
+config/
+  prompts.yaml       Prompt templates    personas.yaml   Strategic personas
+dashboard.py         Operator UI (Streamlit) — for you, not Jim
+main.py              CLI (brief / analyze / lens)
+hermes_sim.py        Reference client: simulates Hermes' push/pull loop
+Dockerfile, Procfile, docker-compose.yml   Deployment (Railway)
+```
+
+## Run it locally
+
 ```bash
-1. chmod +x install.sh start_dashboard.sh
-2. ./install.sh
-3. Edit .env and add API key
-4. ./start_dashboard.sh
+pip install -r requirements.txt
+cp .env.example .env        # set ANTHROPIC_API_KEY (and Telegram/email if testing those)
+uvicorn brain.server:app --port 8000
 ```
 
-Opens at: **http://localhost:8501**
+Then exercise the whole loop against the running server:
 
----
+```bash
+python hermes_sim.py        # pushes data, generates a briefing, delivers, acks, feedback
+```
 
-## 🎯 What It Does
+Operator UI (optional): `streamlit run dashboard.py`.
 
-### 📋 Generate Daily Briefings
-- Morning and evening updates
-- Synthesizes signals from Hermes
-- Shows key metrics
-- Flags items needing your attention
+## The Brain's API
 
-### 📞 Analyze Call Transcripts
-- Upload calls (Zoom, Fathom, Meet)
-- Extracts decisions made
-- Lists follow-ups with owners
-- Shows what can be automated
-- Identifies key themes
+Full contract in [`PHASE_2_API.md`](PHASE_2_API.md). In short:
 
-### 🔍 Pressure-Test Decisions
-- Ask a question or decision
-- Get perspectives from strategic thinkers
-- See potential blind spots
-- Get synthesized recommendations
+- **In:** `POST /webhook/transcript` · `/webhook/digest` · `/webhook/calendar` · `/webhook/metrics`
+- **Learn:** `POST /feedback`
+- **Delivery:** automatic to Telegram (set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`)
+- **Ops:** `GET /health` · `GET /status` · `POST /telegram/test` · `POST /poll/email`
 
-### 📚 Browse History
-- Past briefings (morning/evening)
-- Call analyses
-- Strategic lens results
-- Everything timestamped
+## Deploy & set up for Jim
 
----
+Concierge model (you run it, Jim only sees Telegram). Step-by-step in
+[`CONCIERGE_RUNBOOK.md`](CONCIERGE_RUNBOOK.md): deploy the Brain to Railway, set
+env vars, create the Telegram bot, then a 15-minute setup session with Jim.
 
-## 🔗 Works with Hermes
+## Docs
 
-The Brain reads signals that Hermes surfaces:
-- **Emails** → Priority signals
-- **Skool posts** → Community activity
-- **Metrics** → Business KPIs
-- **Transcripts** → Call recordings
-
----
-
-## 📂 Files You Need to Know
-
-| File | What | When |
-|------|------|------|
-| `INSTALL.bat` | Setup script | Run once |
-| `START_DASHBOARD.bat` | Launch script | Run every time |
-| `.env` | Config (API key) | Edit after INSTALL |
-| `dashboard.py` | The app | Auto-starts |
-
----
-
-## ❓ Troubleshooting
-
-**"Python not found"**
-- Install Python 3.10+ from python.org
-- Make sure to check "Add to PATH"
-
-**"API key error"**
-- Edit `.env` file
-- Add your key from console.anthropic.com
-- Save and try again
-
-**"Hermes data not showing"**
-- Normal if Hermes isn't running
-- Try the sample data included
-- Works offline for testing
-
-See `CLIENT_SETUP.md` for more help.
-
----
-
-## 📖 Full Documentation
-
-- **`CLIENT_SETUP.md`** ← Read this first (detailed setup guide)
-- **`QUICK_START.md`** — How to use the dashboard
-- **`VISUAL_GUIDE.md`** — Page-by-page walkthrough
-- **`DASHBOARD_IMPROVEMENTS.md`** — Design & features
-
----
-
-## 🎯 Typical Workflow
-
-### Morning
-1. Run START_DASHBOARD.bat
-2. Go to 📋 Briefing
-3. Review priorities for the day
-
-### After Calls
-1. Upload transcript
-2. Go to 📞 Analyze Call
-3. Review decisions & follow-ups
-
-### Making Big Decisions
-1. Go to 🔍 Strategic Lens
-2. Enter your question
-3. Get multiple perspectives
-
-### Admin
-1. Go to 📚 History
-2. Review past work
-3. Track patterns
-
----
-
-## ⚙️ What You Need
-
-- Windows 10+ (or Mac/Linux)
-- Python 3.10+ (INSTALL.bat sets it up)
-- Claude API key (free tier available)
-- Hermes running (optional, sample data included)
-
----
-
-## 🚀 First Time?
-
-1. **Read:** `CLIENT_SETUP.md` (has full setup guide)
-2. **Run:** `INSTALL.bat` (one-time installation)
-3. **Launch:** `START_DASHBOARD.bat` (every time)
-4. **Test:** Use sample data (Briefing, Call, Lens)
-
----
-
-## 💡 Pro Tips
-
-- Sample data included — test without Hermes
-- Dashboard is responsive — works on phone too
-- Real-time status shows if Hermes is connected
-- All results saved automatically (in `data/` folder)
-
----
-
-## 💻 Platform Support
-
-- **Windows 10+** → Use `INSTALL.bat` and `START_DASHBOARD.bat`
-- **Mac** → Use `install.sh` and `start_dashboard.sh` (see `MAC_LINUX_SETUP.md`)
-- **Linux** → Use `install.sh` and `start_dashboard.sh` (see `MAC_LINUX_SETUP.md`)
-
----
-
-## 📞 Support
-
-- **Windows setup?** → See `CLIENT_SETUP.md`
-- **Mac/Linux setup?** → See `MAC_LINUX_SETUP.md`
-- **How to use?** → See `QUICK_START.md`
-- **Visual walkthrough?** → See `VISUAL_GUIDE.md`
-
----
-
-**Brain thinks. Hermes acts. You win. 🧠**
+- [`HERMES_BUILD_BRIEF.md`](HERMES_BUILD_BRIEF.md) — spec for the Hermes workhorse
+- [`PHASE_2_API.md`](PHASE_2_API.md) — the Brain's API contract
+- [`CONCIERGE_RUNBOOK.md`](CONCIERGE_RUNBOOK.md) — deploy + onboard Jim
+- [`email_to_jim.md`](email_to_jim.md) — the intro note to Jim

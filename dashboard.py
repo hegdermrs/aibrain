@@ -178,7 +178,7 @@ with st.sidebar:
     st.markdown("### 📊 System Status")
 
     hermes = HermesInterface()
-    digest_age = hermes.hermse_digest_age_minutes()
+    digest_age = hermes.hermes_digest_age_minutes()
     status_class, status_emoji, status_text = _get_status_color(digest_age)
 
     col1, col2 = st.columns(2)
@@ -247,7 +247,7 @@ if page == "📋 Briefing":
         bt_clean = briefing_type.split()[0]
 
     with col2:
-        digest_age = HERMES.hermse_digest_age_minutes()
+        digest_age = HERMES.hermes_digest_age_minutes()
         if digest_age is not None:
             age_text = f"{digest_age:.0f}m" if digest_age < 120 else f"{digest_age/60:.1f}h"
             status_class, emoji, _ = _get_status_color(digest_age)
