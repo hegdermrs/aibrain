@@ -170,7 +170,7 @@ class LearningStore:
 
         current = self.get_lessons()
 
-        from brain.client import get_client, get_model
+        from brain.client import get_client, get_model, extract_text
         client = get_client()
         model = get_model()
 
@@ -207,12 +207,11 @@ class LearningStore:
         resp = client.messages.create(
             model=model,
             max_tokens=1500,
-            temperature=0.3,
             system=("You distill durable preferences from feedback. You are "
                     "conservative: you only encode patterns, never one-offs."),
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = resp.content[0].text
+        raw = extract_text(resp)
 
         lessons = self._parse_lessons(raw)
         if lessons is None:

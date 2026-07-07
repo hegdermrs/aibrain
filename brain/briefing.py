@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-from brain.client import get_client, get_model
+from brain.client import get_client, get_model, extract_text
 from brain.models import (
     BriefingSection,
     BriefingType,
@@ -122,12 +122,11 @@ def generate_briefing(
     response = client.messages.create(
         model=model,
         max_tokens=2048,
-        temperature=0.7,
         system=system,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw_text = response.content[0].text
+    raw_text = extract_text(response)
 
     # Parse the structured response into sections
     sections = _parse_briefing_sections(raw_text)

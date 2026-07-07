@@ -23,4 +23,15 @@ def get_client() -> Anthropic:
 
 def get_model() -> str:
     """Return the model name from env or default."""
-    return os.environ.get("BRAIN_MODEL", "claude-sonnet-4-20250514")
+    return os.environ.get("BRAIN_MODEL", "claude-sonnet-5")
+
+
+def extract_text(response) -> str:
+    """Return the text of a Messages response.
+
+    Newer models can prepend non-text blocks (e.g. a ThinkingBlock) to
+    ``response.content``, so ``content[0].text`` is unsafe. Concatenate every
+    block that actually carries text and skip the rest.
+    """
+    parts = [getattr(block, "text", None) for block in response.content]
+    return "\n".join(p for p in parts if p).strip()

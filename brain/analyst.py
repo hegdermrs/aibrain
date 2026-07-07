@@ -17,7 +17,7 @@ from pathlib import Path
 
 import yaml
 
-from brain.client import get_client, get_model
+from brain.client import get_client, get_model, extract_text
 from brain.models import (
     AutomationCandidate,
     CallAnalysis,
@@ -73,12 +73,11 @@ def analyze_transcript(transcript: CallTranscript) -> CallAnalysis:
     response = client.messages.create(
         model=model,
         max_tokens=3072,
-        temperature=0.5,  # lower temp for more factual extraction
         system=system,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw_text = response.content[0].text
+    raw_text = extract_text(response)
 
     # Parse structured output
     summary = _extract_section(raw_text, "SUMMARY")

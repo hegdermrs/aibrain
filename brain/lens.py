@@ -15,7 +15,7 @@ from pathlib import Path
 
 import yaml
 
-from brain.client import get_client, get_model
+from brain.client import get_client, get_model, extract_text
 from brain.models import LensQuery, LensResult, PersonaResponse
 from brain.personas import get_registry
 
@@ -133,12 +133,11 @@ def _ask_persona(persona, query: LensQuery, prompts: dict) -> PersonaResponse:
     response = client.messages.create(
         model=model,
         max_tokens=1536,
-        temperature=0.8,  # higher temp for creative persona thinking
         system=registry.system_prompt_for(persona.name) + lessons_block("lens"),
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw_text = response.content[0].text
+    raw_text = extract_text(response)
 
     # Extract key insight and recommended action
     key_insight = ""
@@ -180,7 +179,6 @@ def _synthesize(query: LensQuery, responses: list[PersonaResponse], prompts: dic
     response = client.messages.create(
         model=model,
         max_tokens=1536,
-        temperature=0.6,
         system=(
             "You are the Operations Co-Founder for Jim Harshaw Jr.'s coaching "
             "business. You synthesize strategic advice from multiple perspectives. "
@@ -190,4 +188,4 @@ def _synthesize(query: LensQuery, responses: list[PersonaResponse], prompts: dic
         messages=[{"role": "user", "content": prompt}],
     )
 
-    return response.content[0].text
+    return extract_text(response)

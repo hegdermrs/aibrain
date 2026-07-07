@@ -31,8 +31,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
+# Load .env when running locally. Harmless in the cloud, where the platform
+# (e.g. Railway) injects env vars directly.
+load_dotenv()
 
 from brain.analyst import analyze_transcript
 from brain.briefing import generate_briefing
@@ -177,7 +182,11 @@ def _run_briefing(briefing_type: BriefingType) -> Optional[OutgoingMessage]:
 @app.post("/briefing/run")
 def briefing_run(req: BriefingRequest) -> dict:
     bt = BriefingType.MORNING if req.type == "morning" else BriefingType.EVENING
-    msg = _run_briefing(bt)
+    try:
+        msg = _run_briefing(bt)
+    except Exception as e:
+        # Surface the real cause (bad model, quota, etc.) as JSON, not a 500.
+        raise HTTPException(status_code=502, detail=f"Briefing failed: {e}")
     if msg is None:
         raise HTTPException(status_code=409, detail="No digest available yet")
     return {"status": "generated", "outgoing_id": msg.id}
