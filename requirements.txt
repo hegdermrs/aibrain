@@ -1,0 +1,32 @@
+# Brain — Operations Co-Founder
+# Core dependencies
+
+# Model
+anthropic>=0.40.0
+
+# Config
+pyyaml>=6.0
+
+# Data validation
+pydantic>=2.0
+
+# CLI
+click>=8.0
+
+# Rich terminal output
+rich>=13.0
+
+# Date/time
+python-dateutil>=2.8
+
+# Env loading
+python-dotenv>=1.0
+
+# Dashboard (web UI)
+streamlit>=1.30
+watchdog>=4.0
+
+# Automation server (Phase 2)
+fastapi>=0.110
+uvicorn[standard]>=0.27
+apscheduler>=3.10

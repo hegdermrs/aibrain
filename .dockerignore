@@ -1,0 +1,17 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+.env
+.env.local
+.streamlit/secrets.toml
+*.egg-info
+.venv
+venv
+node_modules
+.DS_Store
+.pytest_cache
+.coverage
+build/
+dist/
+*.log

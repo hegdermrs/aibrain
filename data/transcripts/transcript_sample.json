@@ -1,0 +1,83 @@
+{
+  "id": "call_20240627",
+  "title": "Weekly Strategy Call with Sarah — Jun 27",
+  "date": "2024-06-27T10:00:00Z",
+  "participants": ["Jim Harshaw", "Sarah (Operations Assistant)"],
+  "duration_minutes": 45,
+  "segments": [
+    {
+      "speaker": "Jim",
+      "text": "Hey Sarah, let's kick off with what we saw this week. How's the Skool community looking?",
+      "start_time": 0,
+      "end_time": 30
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Really strong week. We're at 500 active members now, engagement is up 22%, and we got three new posts about the summer program. People are fired up.",
+      "start_time": 30,
+      "end_time": 60
+    },
+    {
+      "speaker": "Jim",
+      "text": "Excellent. That 500-member milestone is huge. We should capitalize on this. I've been thinking we need a group coaching option for Q3. Something scalable. Can you start researching what platforms would work?",
+      "start_time": 60,
+      "end_time": 120
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Definitely. I'll look at Kajabi, Circle, and Mighty Networks. Should I focus on something that integrates with Stripe for billing?",
+      "start_time": 120,
+      "end_time": 150
+    },
+    {
+      "speaker": "Jim",
+      "text": "Yeah, billing integration is critical. And let's think about automation too. One thing that's eating my time is invoice delivery. Can we set that up automatically through Stripe or some other tool?",
+      "start_time": 150,
+      "end_time": 180
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Stripe has automated invoicing through email. I can set that up. But first, let me send you options on the group coaching platforms by Friday. I'll do a comparison matrix.",
+      "start_time": 180,
+      "end_time": 210
+    },
+    {
+      "speaker": "Jim",
+      "text": "Perfect. One more thing — we got an inquiry from an enterprise client. Fortune 500 company. They want a custom program. This feels like it could be a big opportunity, maybe $50K+. Let's treat this as high priority.",
+      "start_time": 210,
+      "end_time": 240
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Got it. Enterprise client, high priority. I'll make sure we get them a proposal by end of day tomorrow. Any specific scope or pricing you want me to lead with?",
+      "start_time": 240,
+      "end_time": 270
+    },
+    {
+      "speaker": "Jim",
+      "text": "Let's do a 90-minute discovery call first, understand their needs. I'll lead that. You coordinate the scheduling. And Sarah, given where we're at with growth, let's chat about your role next week. You're doing too much manual work. We need to start automating more.",
+      "start_time": 270,
+      "end_time": 300
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Love that. I agree — there's a lot of repetitive stuff we could automate. Looking forward to that conversation.",
+      "start_time": 300,
+      "end_time": 315
+    },
+    {
+      "speaker": "Jim",
+      "text": "Great. So to recap: you're researching group coaching platforms by Friday, setting up automated invoicing, coordinating the enterprise client discovery call, and we'll dive into workflow automation next week. Sound good?",
+      "start_time": 315,
+      "end_time": 330
+    },
+    {
+      "speaker": "Sarah",
+      "text": "Perfect. That's clear. I'll send you the platform comparison Friday morning.",
+      "start_time": 330,
+      "end_time": 345
+    }
+  ],
+  "full_text": "Jim: Hey Sarah, let's kick off with what we saw this week. How's the Skool community looking?\n\nSarah: Really strong week. We're at 500 active members now, engagement is up 22%, and we got three new posts about the summer program. People are fired up.\n\nJim: Excellent. That 500-member milestone is huge. We should capitalize on this. I've been thinking we need a group coaching option for Q3. Something scalable. Can you start researching what platforms would work?\n\nSarah: Definitely. I'll look at Kajabi, Circle, and Mighty Networks. Should I focus on something that integrates with Stripe for billing?\n\nJim: Yeah, billing integration is critical. And let's think about automation too. One thing that's eating my time is invoice delivery. Can we set that up automatically through Stripe or some other tool?\n\nSarah: Stripe has automated invoicing through email. I can set that up. But first, let me send you options on the group coaching platforms by Friday. I'll do a comparison matrix.\n\nJim: Perfect. One more thing — we got an inquiry from an enterprise client. Fortune 500 company. They want a custom program. This feels like it could be a big opportunity, maybe $50K+. Let's treat this as high priority.\n\nSarah: Got it. Enterprise client, high priority. I'll make sure we get them a proposal by end of day tomorrow. Any specific scope or pricing you want me to lead with?\n\nJim: Let's do a 90-minute discovery call first, understand their needs. I'll lead that. You coordinate the scheduling. And Sarah, given where we're at with growth, let's chat about your role next week. You're doing too much manual work. We need to start automating more.\n\nSarah: Love that. I agree — there's a lot of repetitive stuff we could automate. Looking forward to that conversation.\n\nJim: Great. So to recap: you're researching group coaching platforms by Friday, setting up automated invoicing, coordinating the enterprise client discovery call, and we'll dive into workflow automation next week. Sound good?\n\nSarah: Perfect. That's clear. I'll send you the platform comparison Friday morning.",
+  "source": "zoom"
+}

@@ -1,0 +1,63 @@
+{
+  "signals": [
+    {
+      "id": "sig_001",
+      "source": "email",
+      "title": "Enterprise client inquiry",
+      "summary": "Fortune 500 company interested in Jim's executive coaching program for Q3",
+      "priority": "high",
+      "timestamp": "2024-06-30T09:15:00Z",
+      "raw_text": "Hi Jim,\n\nWe've heard great things about your coaching approach. We're looking to bring in an expert for our executive team this quarter. Can we discuss a custom program?\n\nBest,\nSarah from Acme Corp",
+      "sender": "sarah@acme.com",
+      "thread_id": "thread_001",
+      "requires_response": true
+    },
+    {
+      "id": "sig_002",
+      "source": "skool",
+      "title": "Member milestone: 500 active members",
+      "summary": "Skool community hit 500 active members. Engagement up 22% this week.",
+      "priority": "high",
+      "timestamp": "2024-06-30T08:45:00Z",
+      "raw_text": "🎉 Community Milestone\n\nWe just crossed 500 active members in the Skool community! This represents 22% growth in engagement metrics over the past week.",
+      "sender": "skool_bot",
+      "requires_response": false
+    },
+    {
+      "id": "sig_003",
+      "source": "email",
+      "title": "June program participant feedback",
+      "summary": "Average satisfaction score: 9.2/10. Three participants interested in group coaching option.",
+      "priority": "medium",
+      "timestamp": "2024-06-30T07:30:00Z",
+      "raw_text": "Jim,\n\nJune cohort feedback is in. Overall satisfaction is 9.2/10. Three participants mentioned interest in a group coaching option for next quarter.\n\nDetails attached.",
+      "sender": "feedback@coachingapp.com",
+      "requires_response": false
+    },
+    {
+      "id": "sig_004",
+      "source": "telegram",
+      "title": "Assistant question: Can we automate invoice delivery?",
+      "summary": "Sarah asking if we can automate invoice delivery via email/Stripe",
+      "priority": "medium",
+      "timestamp": "2024-06-30T06:00:00Z",
+      "raw_text": "Hey Jim, quick question - can we set up automated invoice delivery to clients? Doing it manually each time is eating up time.",
+      "sender": "Sarah",
+      "requires_response": true
+    },
+    {
+      "id": "sig_005",
+      "source": "email",
+      "title": "Competitor pricing update",
+      "summary": "Similar coach raised pricing 15% this month. Market pressure increasing.",
+      "priority": "low",
+      "timestamp": "2024-06-29T16:20:00Z",
+      "raw_text": "Market report: Top 3 competitors all raised prices 10-15% in June. Market sentiment suggests strong demand for premium coaching.",
+      "sender": "market_intel@coach.com",
+      "requires_response": false
+    }
+  ],
+  "generated_at": "2024-06-30T10:00:00Z",
+  "time_window_start": "2024-06-29T10:00:00Z",
+  "time_window_end": "2024-06-30T10:00:00Z"
+}

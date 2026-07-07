@@ -1,0 +1,45 @@
+{
+  "metrics": [
+    {
+      "name": "Active Clients",
+      "value": 42,
+      "previous_value": 40,
+      "unit": "",
+      "trend": "up",
+      "note": "2 new onboardings this week"
+    },
+    {
+      "name": "MRR (Monthly Recurring Revenue)",
+      "value": 21000,
+      "previous_value": 20000,
+      "unit": "$",
+      "trend": "up",
+      "note": "Up from price optimization"
+    },
+    {
+      "name": "Skool Community Engagement",
+      "value": 87.5,
+      "previous_value": 85,
+      "unit": "%",
+      "trend": "up",
+      "note": "New 500-member milestone"
+    },
+    {
+      "name": "Client Satisfaction",
+      "value": 9.2,
+      "previous_value": 9.1,
+      "unit": "/10",
+      "trend": "up",
+      "note": "June feedback averaged 9.2"
+    },
+    {
+      "name": "Waitlist",
+      "value": 12,
+      "previous_value": 9,
+      "unit": " people",
+      "trend": "up",
+      "note": "Growing interest"
+    }
+  ],
+  "timestamp": "2024-06-30T10:00:00Z"
+}

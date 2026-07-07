@@ -1,0 +1,15 @@
+[theme]
+# Clean, professional theme for Jim's dashboard
+primaryColor = "#1E88E5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7FA"
+textColor = "#1A1A2E"
+font = "sans serif"
+
+[server]
+# Safer defaults
+enableXsrfProtection = true
+enableCORS = false
+
+[browser]
+gatherUsageStats = false

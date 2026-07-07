@@ -1,0 +1,29 @@
+# ── Secrets ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.streamlit/secrets.toml
+
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# ── Runtime data (keep only the *_sample.json inputs) ─────
+data/*
+!data/incoming/
+!data/transcripts/
+data/incoming/*
+!data/incoming/*_sample.json
+data/transcripts/*
+!data/transcripts/*_sample.json
+
+# ── Local tooling / OS ───────────────────────────────────
+.openclaude/
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
