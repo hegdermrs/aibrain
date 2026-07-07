@@ -253,6 +253,20 @@ def outgoing_ack(message_id: str) -> dict:
     return {"status": "acked", "id": message_id}
 
 
+@app.get("/outgoing/recent")
+def outgoing_recent(limit: int = 20) -> dict:
+    """Recently sent messages (delivered or not), newest first.
+
+    Since direct Telegram delivery marks messages delivered immediately,
+    Hermes has no other way to discover what was just sent to Jim — this is
+    what lets it attach a Telegram reaction to the right `target_ref` in
+    POST /feedback (best-effort: matched to the most recent delivery, not a
+    literal Telegram reply thread).
+    """
+    msgs = outbox.list_all(limit=limit)
+    return {"count": len(msgs), "messages": [m.model_dump(mode="json") for m in msgs]}
+
+
 # ── Self-learning loop (feedback → reflection → lessons) ──────────────────────
 
 

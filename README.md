@@ -12,8 +12,12 @@ Two agents, one job each:
   emails, call transcripts, calendar, and metrics; reasons over them; produces
   briefings, call analyses, and strategic advice; and texts Jim on Telegram. It
   never touches an app directly. Learns from Jim's reactions.
-- **Hermes** (separate, runs on Jim's Mac) — the workhorse. Reads email,
-  calendar, Skool, and calls, and pushes the data to the Brain's webhooks. See
+- **Hermes** (separate, runs on Jim's Mac) — the workhorse. This is Jim's
+  existing [Hermes Agent](https://hermes-agent.nousresearch.com/) (Nous
+  Research), a general-purpose AI agent already connected to his
+  Telegram/email — not custom-built software. It reads email, calendar,
+  Skool, and calls, and pushes the data to the Brain's webhooks via a skill
+  (`brain-bridge`) loaded into it. Contract:
   [`HERMES_BUILD_BRIEF.md`](HERMES_BUILD_BRIEF.md).
 
 ```

@@ -23,9 +23,18 @@ Telegram chat. Everything below is done by **you**, once.
      captured when he taps Start (step B1) — set it and redeploy.
    - Verify with `POST <url>/telegram/test` → Jim's phone should buzz.
 
-3. **Hermes** (the workhorse on Jim's Mac): have it ready with the Brain URL.
-   It reads email/calendar/Skool/calls and pushes them in; the Brain delivers
-   to Telegram itself.
+3. **Hermes** — this is Jim's existing
+   [Hermes Agent](https://hermes-agent.nousresearch.com/) install on his
+   Mac, already connected to his Telegram/email. Load the `brain-bridge`
+   skill (`~/.hermes/skills/brain-bridge/SKILL.md`): copy
+   `config.example.yaml` to `~/.hermes/brain-bridge/config.yaml`, set
+   `brain_base_url` to the Railway URL from step 1 and `telegram_bot_token`
+   to the same token from step 2, then wire the `hermes cron create`
+   commands in the skill's "Scheduled Runs" section. Read the skill's
+   **Common Pitfalls** section first — Skool scanning is unverified
+   scaffolding (prefer the agent-driven path over the scripted fallback
+   until checked against the live community), and metrics beyond Skool
+   member count need a coaching-platform reader that isn't built yet.
 
 ---
 
@@ -59,24 +68,22 @@ That's Jim's entire involvement. From here he only receives and replies.
 
 ## C. First value: the call-summary loop
 
-Ship this before briefings — it needs nothing from Jim (Fathom already
-records his calls). Give Hermes this prompt:
+Ship this before briefings — it needs nothing from Jim beyond Fathom
+auto-share (already on from step A3). The `brain-bridge` skill covers this
+loop already — you're wiring cron jobs, not hand-writing it:
 
-> You connect to the Brain at `<railway-url>`. Do two things continuously:
->
-> **Deliver:** every ~2 minutes, GET `<railway-url>/outgoing/pending`. For each
-> message, send its `text` to Jim on Telegram exactly as written, then POST
-> `<railway-url>/outgoing/{id}/ack` with body `{}`.
->
-> **Ingest calls:** whenever a Fathom transcript arrives in Jim's email, POST
-> it to `<railway-url>/webhook/transcript` as JSON with fields: `id`, `title`,
-> `date`, `participants` (list), `duration_minutes`, `segments` (use `[]`),
-> `full_text` (the transcript), `source": "fathom"`. The Brain analyzes it and
-> queues the summary — your deliver loop sends it to Jim.
->
-> **Feedback:** when Jim reacts to a delivered message (👍/👎 or a reply), POST
-> `<railway-url>/feedback` with `{target_kind, target_ref: <that message id>,
-> rating, note, tags}`. This is what makes it improve.
+- The "brain-transcripts" cron job (agent-driven, every 15 min per the
+  skill's "Scheduled Runs" section) checks email for a new Fathom
+  transcript and runs `scripts/push_transcript.py`, which `POST`s to
+  `<railway-url>/webhook/transcript`. The Brain analyzes it and delivers
+  the summary straight to Jim's Telegram.
+- Feedback (👍/👎 or a reply) is captured by the "brain-feedback" cron job
+  (`--no-agent`, every ~2 min) running `scripts/poll_feedback.py`, which
+  long-polls the Brain's bot token for Jim's reactions and `POST`s
+  `/feedback`, resolving which message he means via `GET /outgoing/recent`.
+- `GET /outgoing/pending` → send → ack only matters as a fallback if direct
+  Telegram delivery is ever unconfigured on the Brain — not part of this
+  skill's normal operation.
 
 Result: Jim finishes a call → minutes later gets decisions + follow-ups texted
 to him. That alone justifies the whole system.
