@@ -46,8 +46,9 @@ Telegram chat. Everything below is done by **you**, once.
 3. **In Fathom:** turn on **auto-share transcript to email** (Settings →
    sharing/notifications). Now every recorded call emails a transcript into
    the Gmail Hermes already watches.
-4. **Ask Jim these 5 questions**, type answers into the business profile
-   (`hermes/state/business_profile.json` per the build brief):
+4. **Ask Jim these 5 questions out loud** — no file to type them into; his
+   Hermes Agent has its own persistent memory/user-modeling and will absorb
+   the context from the conversation itself:
    1. What are your main offers and prices?
    2. Who's on your team, and who handles what (especially your assistant)?
    3. What should I always flag as urgent / interrupt you for?
