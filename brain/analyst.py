@@ -72,12 +72,19 @@ def analyze_transcript(transcript: CallTranscript) -> CallAnalysis:
 
     response = client.messages.create(
         model=model,
-        max_tokens=3072,
+        max_tokens=8192,
         system=system,
         messages=[{"role": "user", "content": prompt}],
     )
 
     raw_text = extract_text(response)
+    if not raw_text:
+        # Don't report success on an empty response — surface it so the
+        # webhook returns 502 instead of queueing a header-only message.
+        raise RuntimeError(
+            "analysis model returned no text "
+            f"(stop_reason={getattr(response, 'stop_reason', None)!r})"
+        )
 
     # Parse structured output
     summary = _extract_section(raw_text, "SUMMARY")
@@ -85,6 +92,11 @@ def analyze_transcript(transcript: CallTranscript) -> CallAnalysis:
     follow_ups = _parse_follow_ups(raw_text)
     automation = _parse_automation(raw_text)
     themes = _parse_key_themes(raw_text)
+
+    # If the model answered in a shape the section parsers didn't recognize,
+    # deliver the raw analysis rather than an empty shell.
+    if not (summary or decisions or follow_ups or automation or themes):
+        summary = raw_text
 
     return CallAnalysis(
         call_id=transcript.id,
@@ -113,28 +125,57 @@ def analyze_latest(transcript_dir: str = "./data/transcripts") -> CallAnalysis |
 # ── Parsing helpers ──────────────────────────────────────────────────────────
 
 
+# The section names the call_analysis prompt asks for. Used to tell real
+# section headers apart from numbered list items inside a section.
+_SECTION_KEYWORDS = ("SUMMARY", "DECISIONS", "FOLLOW-UP", "FOLLOW UP",
+                     "DELEGATION", "AUTOMATION", "KEY THEMES")
+
+
+def _bare(line: str) -> str:
+    """Strip markdown decoration so headers match however the model styles
+    them: '## 2. DECISIONS MADE' / '**SUMMARY**' → '2. DECISIONS MADE' / 'SUMMARY'."""
+    return line.strip().strip("#*_").strip()
+
+
+def _is_section_header(stripped: str) -> bool:
+    """Does this line introduce one of the known output sections?"""
+    bare = _bare(stripped)
+    upper = bare.upper()
+    if not any(k in upper for k in _SECTION_KEYWORDS):
+        return False
+    if stripped.startswith("#"):
+        return True
+    if stripped.startswith("**") and stripped.endswith(("**", "**:")):
+        return True
+    if upper[:1].isdigit() and ". " in upper[:4]:
+        return True
+    # Plain 'SUMMARY' / 'DECISIONS MADE:' style header: a short title line,
+    # not a sentence that merely mentions a keyword.
+    head = upper.split(":", 1)[0].strip()
+    return (len(head) < 40 and not head.endswith(".")
+            and any(head.startswith(k) for k in _SECTION_KEYWORDS))
+
+
 def _extract_section(text: str, section_name: str) -> str:
     """Extract the content of a named section from the response text."""
     in_section = False
     lines = []
     for line in text.split("\n"):
         stripped = line.strip()
-        if section_name.upper() in stripped.upper() and (
-            stripped[0].isdigit() or stripped.upper().startswith(section_name.upper())
-        ):
-            in_section = True
-            # If the section header contains content after a colon/hyphen
-            if ":" in stripped:
-                after = stripped.split(":", 1)[1].strip()
-                if after:
-                    lines.append(after)
+        if _is_section_header(stripped):
+            if in_section:
+                break  # reached the next section
+            if section_name.upper() in _bare(stripped).upper():
+                in_section = True
+                # If the section header contains content after a colon
+                bare = _bare(stripped)
+                if ":" in bare:
+                    after = bare.split(":", 1)[1].strip()
+                    if after:
+                        lines.append(after)
             continue
-        if in_section:
-            # Check if we've hit the next numbered section
-            if stripped and stripped[0].isdigit() and ". " in stripped[:4]:
-                break
-            if stripped:
-                lines.append(stripped)
+        if in_section and stripped:
+            lines.append(stripped)
     return "\n".join(lines).strip()
 
 
@@ -199,9 +240,10 @@ def _parse_follow_ups(text: str) -> list[FollowUp]:
             owner = "Jim"
             priority = Priority.MEDIUM
             if "owner:" in clean.lower():
-                parts = clean.split("owner:", 1)
-                clean = parts[0].strip()
-                owner_part = parts[1].strip()
+                # Case-insensitive split ("Owner: Sarah" is the common shape)
+                idx = clean.lower().index("owner:")
+                owner_part = clean[idx + len("owner:"):].strip()
+                clean = clean[:idx].strip().rstrip(",—-").strip()
                 owner = owner_part.split(",")[0].strip()
             if "[" in clean and "]" in clean:
                 bracket = clean[clean.index("[")+1:clean.index("]")]
